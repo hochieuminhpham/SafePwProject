@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Safe Safe</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .app-container {
+            background-color: #fff;
+            border: 2px solid #333;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-left strong {
+            font-size: 1.1em;
+        }
+
+        .btn-lock {
+            padding: 5px 20px;
+            border: 2px solid #000;
+            background-color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .change-pwd {
+            color: #0056b3;
+            text-decoration: underline;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .controls-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-container input {
+            padding: 5px;
+            border: 2px solid #333;
+            width: 150px;
+        }
+
+        .search-container font {
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #333;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #dcdcdc;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .sort-icon {
+            display: inline-block;
+            margin-left: 5px;
+            font-size: 0.8em;
+            color: #555;
+            cursor: pointer;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        .action-link {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .action-link:hover {
+            text-decoration: underline;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .pagination span {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            color: #0056b3;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .pagination span:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div class="header-area">
+        <div class="header-left">
+            <strong>Safe is open</strong>
+            <button class="btn-lock">lock Safe</button>
+        </div>
+        <a class="change-pwd">change password...</a>
+    </div>
+
+    <div class="controls-area">
+        <div class="search-container">
+            <input type="text" />
+            <strong>search</strong>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Website/Application <span class="sort-icon">▲▼</span></th>
+            <th>Username <span class="sort-icon">▲▼</span></th>
+            <th>Password</th>
+            <th>Remarks</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+    </div>
+
+</div>
+
+</body>
+</html>
