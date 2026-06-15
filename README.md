@@ -1,7 +1,8 @@
 
 # Konzept
 
-<img width="1037" height="845" alt="image" src="https://github.com/user-attachments/assets/5a16edeb-cec3-4299-9bf2-b2be09bc91cf" />
+<img width="870" height="847" alt="image" src="https://github.com/user-attachments/assets/7749ad91-0be3-441d-9345-1215a8bf3511" />
+
 
 ## UseCases
 ### 1. Nutzer loggt sich ein
