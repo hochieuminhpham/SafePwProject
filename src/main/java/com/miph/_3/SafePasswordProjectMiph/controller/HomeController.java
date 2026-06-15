@@ -5,12 +5,12 @@ import com.miph._3.SafePasswordProjectMiph.model.repository.AccountRepository;
 import com.miph._3.SafePasswordProjectMiph.service.HomeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class HomeController {
@@ -24,14 +24,22 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(Model model, @CookieValue(name = "user-theme", required = false) String theme) {
+        //if (theme == null){
+          //  return "login";
+        //}
+
         return "home";
     }
 
     @GetMapping("/getAccounts")
-    public Page<Account> getAccounts(@RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "10") int size){
+    @ResponseBody
+    public ResponseEntity<Page<Account>> getAccounts(Pageable pageable) {
+        Page<Account> accounts = homeService.getAccounts(pageable.getPageNumber(), pageable.getPageSize());
 
-        return homeService.getAccounts(page, size);
+        if (accounts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(accounts);
     }
 }

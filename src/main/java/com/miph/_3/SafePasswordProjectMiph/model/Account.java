@@ -1,9 +1,6 @@
 package com.miph._3.SafePasswordProjectMiph.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,7 +12,8 @@ import java.util.UUID;
 public class Account {
 
     @Id
-    @Column(name = "account_uuid", length = 36, nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "account_uuid", length = 36, nullable = false, columnDefinition = "VARCHAR(36)")
     private String accountUuid;
 
     @Column(name = "username", length = 50, nullable = false)
@@ -30,8 +28,8 @@ public class Account {
     @Column(name = "password_hash", length = 255, nullable = false)
     private String passwordHash;
 
-    @Column(name = "user_uuid", length = 255, nullable = false)
-    private UUID userUuid;
+    @Column(name = "user_uuid", length = 36, nullable = false)
+    private String userUuid;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -81,11 +79,11 @@ public class Account {
         this.passwordHash = passwordHash;
     }
 
-    public UUID getUserUuid() {
+    public String getUserUuid() {
         return userUuid;
     }
 
-    public void setUserUuid(UUID userUuid) {
+    public void setUserUuid(String userUuid) {
         this.userUuid = userUuid;
     }
 
