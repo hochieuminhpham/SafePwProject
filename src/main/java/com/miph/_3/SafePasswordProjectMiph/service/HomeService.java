@@ -30,6 +30,15 @@ public class HomeService {
         return accountRepository.findByUserUuid(uuid, pageRequest);
     }
 
+    public Page<Account> findAccounts(int page, int size, String searchText, String uuid){
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size
+        );
+
+        return accountRepository.findAccountsLikeUsername(searchText, uuid, pageRequest);
+    }
+
     public Account createAccount(String username, String path, String email, String rawPassword, String userUuid) {
 
         Account newAccount = new Account();

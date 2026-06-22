@@ -53,4 +53,21 @@ public class HomeController {
         return ResponseEntity.ok(dtoPage);
     }
 
+    @GetMapping("/findAccounts")
+    @ResponseBody
+    public ResponseEntity<Page<AccountDto>> findAccounts(Pageable pageable, String searchText, @CookieValue(name = "user-session", required = false) String sessionToken){
+        if (sessionToken == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Page<Account> accounts = homeService.findAccounts(pageable.getPageNumber(), pageable.getPageSize(), searchText, sessionToken);
+
+        if (accounts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        Page<AccountDto> dtoPage = accounts.map(AccountDto::new);
+
+        return ResponseEntity.ok(dtoPage);
+    }
 }

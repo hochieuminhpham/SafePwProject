@@ -18,8 +18,8 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     Optional<Account> findByUsername(String username);
 
-    @Query("SELECT a FROM Account a WHERE a.email LIKE %:domain AND a.path IS NOT NULL")
-    List<Account> findAccountsInDomainWithValidPath(@Param("domain") String domain);
+    @Query("SELECT a FROM Account a WHERE a.username LIKE %:name AND a.userUuid = :userUuid")
+    Page<Account> findAccountsLikeUsername(@Param("name") String name, @Param("userUuid") String userUuid, Pageable pageable);
 
     Page<Account> findByUserUuid(String userUuid, Pageable pageable);
 

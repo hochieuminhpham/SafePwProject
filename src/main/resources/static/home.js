@@ -1,8 +1,47 @@
 document.addEventListener('DOMContentLoaded', () => {
-    getAccountFromBackend(0, 10);
+    const savedPage = parseInt(localStorage.getItem('currentPage')) || 0;
+    const savedSize = parseInt(localStorage.getItem('pageSize')) || 10;
+
+    getAccountFromBackend(savedPage, savedSize);
+    initSearch();
 });
 
+const searchAccount = (searchText) => {
+    const size = parseInt(localStorage.getItem("pageSize") || 0);
+
+    fetch(`/findAccounts?searchTerm=${searchText}?page=0&size=${size}`)
+        .then(res => {
+            if (!res.ok || res.status === 204) throw new Error("Kein Inhalt oder nicht autorisiert");
+            return res.json();
+        })
+        .then(data => {
+            if (data && data.content) {
+                renderTable(data.content);
+                let totalPagesCount = 0;
+                let currentPageIndex = 0;
+                if (data.page) {
+                    totalPagesCount = data.page.totalPages;
+                    currentPageIndex = data.page.number;
+                }
+                renderPagination(totalPagesCount, currentPageIndex, size);
+            }
+        })
+        .catch(err => console.error("Fehler beim Abrufen der Daten:", err));
+}
+
+const initSearch = () => {
+    const searchBox = document.getElementById('search-input');
+    if (searchBox){
+        searchBox.addEventListener('keyup', (event) => {
+            searchAccount(event.target.value);
+        })
+    }
+}
+
 const getAccountFromBackend = (page, size) => {
+    localStorage.setItem('currentPage', page);
+    localStorage.setItem('pageSize', size);
+
     fetch(`/getAccounts?page=${page}&size=${size}`)
         .then(res => {
             if (!res.ok || res.status === 204) throw new Error("Kein Inhalt oder nicht autorisiert");
@@ -11,26 +50,25 @@ const getAccountFromBackend = (page, size) => {
         .then(data => {
             if (data && data.content) {
                 renderTable(data.content);
-
                 let totalPagesCount = 0;
                 let currentPageIndex = 0;
-
-                debugger;
                 if (data.page) {
                     totalPagesCount = data.page.totalPages;
                     currentPageIndex = data.page.number;
                 }
-
                 renderPagination(totalPagesCount, currentPageIndex, size);
             }
         })
         .catch(err => console.error("Fehler beim Abrufen der Daten:", err));
 }
 
+const clearTable = (tbody) => {
+    tbody.innerHTML = '';
+}
 
 const renderTable = (accounts) => {
     const tbody = document.querySelector('tbody');
-    tbody.innerHTML = '';
+    clearTable(tbody);
 
     accounts.forEach(account => {
         const tr = document.createElement('tr');
