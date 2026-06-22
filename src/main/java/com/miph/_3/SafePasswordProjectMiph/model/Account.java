@@ -25,8 +25,8 @@ public class Account {
     @Column(name = "email", length = 100, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_hash", length = 255, nullable = false)
-    private String passwordHash;
+    @Column(name = "password_encoded", length = 255, nullable = false)
+    private String passwordEncoded;
 
     @Column(name = "user_uuid", length = 36, nullable = false)
     private String userUuid;
@@ -71,12 +71,12 @@ public class Account {
         this.email = email;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPasswordEncoded() {
+        return passwordEncoded;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPasswordEncoded(String passwordEncoded) {
+        this.passwordEncoded = passwordEncoded;
     }
 
     public String getUserUuid() {

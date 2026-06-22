@@ -1,6 +1,7 @@
 package com.miph._3.SafePasswordProjectMiph.controller;
 
 import com.miph._3.SafePasswordProjectMiph.model.Account;
+import com.miph._3.SafePasswordProjectMiph.model.dto.AccountDto;
 import com.miph._3.SafePasswordProjectMiph.model.repository.AccountRepository;
 import com.miph._3.SafePasswordProjectMiph.service.HomeService;
 import org.springframework.data.domain.Page;
@@ -24,22 +25,32 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String home(Model model, @CookieValue(name = "user-theme", required = false) String theme) {
-        //if (theme == null){
-          //  return "login";
-        //}
+    public String home(Model model, @CookieValue(name = "user-session", required = false) String userSession) {
+        if (userSession == null) {
+            return "login";
+        }
 
         return "home";
     }
 
+
     @GetMapping("/getAccounts")
     @ResponseBody
-    public ResponseEntity<Page<Account>> getAccounts(Pageable pageable) {
-        Page<Account> accounts = homeService.getAccounts(pageable.getPageNumber(), pageable.getPageSize());
+    public ResponseEntity<Page<AccountDto>> getAccounts(Pageable pageable, @CookieValue(name = "user-session", required = false) String sessionToken) {
+
+        if (sessionToken == null){
+            return ResponseEntity.status(401).build();
+        }
+
+        Page<Account> accounts = homeService.getAccounts(pageable.getPageNumber(), pageable.getPageSize(), sessionToken);
 
         if (accounts.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(accounts);
+
+        Page<AccountDto> dtoPage = accounts.map(AccountDto::new);
+
+        return ResponseEntity.ok(dtoPage);
     }
+
 }

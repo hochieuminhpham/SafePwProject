@@ -37,8 +37,7 @@ const renderTable = (accounts) => {
         tr.innerHTML = `
             <td>${account.path || ''}</td>
             <td>${account.email || account.username || ''}</td>
-            <td>${account.passwordHash || ''}</td>
-            <td></td> 
+            <td>${account.passwordEncoded || ''}</td>
             <td><a class="action-link" onclick="editAccount('${account.accountUuid}')">edit</a></td>
             <td><a class="action-link" onclick="deleteAccount('${account.accountUuid}')">delete</a></td>
         `;
