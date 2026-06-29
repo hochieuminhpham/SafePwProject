@@ -8,3 +8,10 @@
 
 ### 1. Nutzer loggt sich ein
 <img width="1079" height="619" alt="image" src="https://github.com/user-attachments/assets/86f8afe0-9e3f-46ed-8bd1-32c2fd6f83d7" />
+
+# Reflexion
+Mir hat das Projekt viel Spass, weil ich meine volle Kreativität verwenden kann. Ich hatte eigentlich sehr vieles vor, Zum Beispiel die Frontend und Backend kommunizieren sich mit ein Asymmetrische Verschlüsselung (die pub und private keys werden auf dem Datenbank gespeichert), damit die Daten geheim bleiben. So kann ein dritter Abfänger nicht die Daten bekommen.
+
+
+
+
