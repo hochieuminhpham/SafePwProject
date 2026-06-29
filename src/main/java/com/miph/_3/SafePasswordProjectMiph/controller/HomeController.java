@@ -5,6 +5,9 @@ import com.miph._3.SafePasswordProjectMiph.model.dto.AccountDto;
 import com.miph._3.SafePasswordProjectMiph.model.repository.AccountRepository;
 import com.miph._3.SafePasswordProjectMiph.service.EncryptionService;
 import com.miph._3.SafePasswordProjectMiph.service.HomeService;
+import com.miph._3.SafePasswordProjectMiph.service.LoggingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +23,13 @@ public class HomeController {
 
     protected final HomeService homeService;
     protected final EncryptionService encryptionService;
+    protected final LoggingService loggingService;
+    protected static final Logger log = LoggerFactory.getLogger(HomeController.class);
 
-    public HomeController(HomeService homeService, AccountRepository accountRepository, EncryptionService encryptionService) {
+    public HomeController(HomeService homeService, LoggingService loggingService, EncryptionService encryptionService) {
         this.homeService = homeService;
         this.encryptionService = encryptionService;
-
+        this.loggingService = loggingService;
     }
 
     @GetMapping("/")
@@ -45,12 +50,14 @@ public class HomeController {
             @CookieValue(name = "user-session", required = false) String sessionToken) {
 
         if (sessionToken == null) {
+            loggingService.logUnauthorizedSession(log, "/getAccounts");
             return ResponseEntity.status(401).build();
         }
 
         Page<Account> accounts = homeService.getAccounts(pageable.getPageNumber(), pageable.getPageSize(), search, sessionToken);
 
         if (accounts.isEmpty()) {
+            log.info("no accounts found");
             return ResponseEntity.noContent().build();
         }
 
@@ -65,6 +72,7 @@ public class HomeController {
     public ResponseEntity<String> decryptPassword(@RequestParam(value = "pw", required = false) String pw,
                                                   @CookieValue(name = "user-session", required = false) String sessionToken){
         if (sessionToken == null) {
+            loggingService.logUnauthorizedSession(log, "/decryptPw");
             return ResponseEntity.status(401).build();
         }
 
@@ -73,6 +81,7 @@ public class HomeController {
         try {
             decryptedPw = encryptionService.decrypt(pw);
         } catch (Exception e){
+            log.error("Unable to decrypt pw {}", pw);
             return ResponseEntity.badRequest().build();
         }
 
