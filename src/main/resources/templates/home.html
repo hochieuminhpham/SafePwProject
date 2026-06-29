@@ -44,7 +44,7 @@
             cursor: pointer;
         }
 
-        .change-pwd {
+        .create-account {
             color: #0056b3;
             text-decoration: underline;
             font-size: 0.9em;
@@ -152,7 +152,7 @@
             <strong>Safe is open</strong>
             <button class="btn-lock">lock Safe</button>
         </div>
-        <a class="change-pwd">change password...</a>
+        <a class="create-account">create account</a>
     </div>
 
     <div class="controls-area">
@@ -165,8 +165,8 @@
     <table>
         <thead>
         <tr>
-            <th>Website/Application <span class="sort-icon">▲▼</span></th>
-            <th>Username <span class="sort-icon">▲▼</span></th>
+            <th>Website/Application <span class="sort-icon" id="pathsort">▲▼</span></th>
+            <th>Username <span class="sort-icon" id="usernamesort">▲▼</span></th>
             <th>Password</th>
             <th></th>
             <th></th>
@@ -180,9 +180,6 @@
     </div>
 
     <script th:src="@{/home.js}"></script>
-
-
-
 </div>
 
 </body>

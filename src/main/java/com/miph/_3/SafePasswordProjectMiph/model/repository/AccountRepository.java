@@ -23,5 +23,13 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     Page<Account> findByUserUuid(String userUuid, Pageable pageable);
 
-    boolean existsByEmail(String email);
+    @Query("SELECT a FROM Account a WHERE a.userUuid = :userUuid AND (" +
+            "LOWER(a.path) LIKE LOWER(:keyword) OR " +
+            "LOWER(a.email) LIKE LOWER(:keyword) OR " +
+            "LOWER(a.username) LIKE LOWER(:keyword))")
+    Page<Account> searchByUserUuidAndKeyword(
+            @Param("userUuid") String userUuid,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }

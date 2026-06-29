@@ -21,13 +21,16 @@ public class HomeService {
         this.encryptionService = encryptionService;
     }
 
-    public Page<Account> getAccounts(int page, int size, String uuid){
-        PageRequest pageRequest = PageRequest.of(
-                page,
-                size
-        );
+    public Page<Account> getAccounts(int page, int size, String search, String uuid) {
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        return accountRepository.findByUserUuid(uuid, pageRequest);
+        if (search == null || search.trim().isEmpty()) {
+            return accountRepository.findByUserUuid(uuid, pageRequest);
+        }
+
+        String searchKeyword = "%" + search.trim() + "%";
+
+        return accountRepository.searchByUserUuidAndKeyword(uuid, searchKeyword, pageRequest);
     }
 
     public Page<Account> findAccounts(int page, int size, String searchText, String uuid){

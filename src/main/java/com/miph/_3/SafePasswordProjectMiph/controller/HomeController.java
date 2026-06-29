@@ -3,6 +3,7 @@ package com.miph._3.SafePasswordProjectMiph.controller;
 import com.miph._3.SafePasswordProjectMiph.model.Account;
 import com.miph._3.SafePasswordProjectMiph.model.dto.AccountDto;
 import com.miph._3.SafePasswordProjectMiph.model.repository.AccountRepository;
+import com.miph._3.SafePasswordProjectMiph.service.EncryptionService;
 import com.miph._3.SafePasswordProjectMiph.service.HomeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,9 +19,11 @@ public class HomeController {
 
 
     protected final HomeService homeService;
+    protected final EncryptionService encryptionService;
 
-    public HomeController(HomeService homeService, AccountRepository accountRepository){
+    public HomeController(HomeService homeService, AccountRepository accountRepository, EncryptionService encryptionService) {
         this.homeService = homeService;
+        this.encryptionService = encryptionService;
 
     }
 
@@ -36,31 +39,16 @@ public class HomeController {
 
     @GetMapping("/getAccounts")
     @ResponseBody
-    public ResponseEntity<Page<AccountDto>> getAccounts(Pageable pageable, @CookieValue(name = "user-session", required = false) String sessionToken) {
+    public ResponseEntity<Page<AccountDto>> getAccounts(
+            Pageable pageable,
+            @RequestParam(value = "search", required = false) String search,
+            @CookieValue(name = "user-session", required = false) String sessionToken) {
 
-        if (sessionToken == null){
-            return ResponseEntity.status(401).build();
-        }
-
-        Page<Account> accounts = homeService.getAccounts(pageable.getPageNumber(), pageable.getPageSize(), sessionToken);
-
-        if (accounts.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        Page<AccountDto> dtoPage = accounts.map(AccountDto::new);
-
-        return ResponseEntity.ok(dtoPage);
-    }
-
-    @GetMapping("/findAccounts")
-    @ResponseBody
-    public ResponseEntity<Page<AccountDto>> findAccounts(Pageable pageable, String searchText, @CookieValue(name = "user-session", required = false) String sessionToken){
         if (sessionToken == null) {
             return ResponseEntity.status(401).build();
         }
 
-        Page<Account> accounts = homeService.findAccounts(pageable.getPageNumber(), pageable.getPageSize(), searchText, sessionToken);
+        Page<Account> accounts = homeService.getAccounts(pageable.getPageNumber(), pageable.getPageSize(), search, sessionToken);
 
         if (accounts.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -70,4 +58,25 @@ public class HomeController {
 
         return ResponseEntity.ok(dtoPage);
     }
+
+
+    @GetMapping("/decryptPw")
+    @ResponseBody
+    public ResponseEntity<String> decryptPassword(@RequestParam(value = "pw", required = false) String pw,
+                                                  @CookieValue(name = "user-session", required = false) String sessionToken){
+        if (sessionToken == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String decryptedPw;
+
+        try {
+            decryptedPw = encryptionService.decrypt(pw);
+        } catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(decryptedPw);
+    }
+
 }

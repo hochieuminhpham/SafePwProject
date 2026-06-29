@@ -1,15 +1,36 @@
+let currentAccounts = [];
+let sortDirections = {
+    usernamesort: 'asc',
+    pathsort: 'asc'
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const savedPage = parseInt(localStorage.getItem('currentPage')) || 0;
     const savedSize = parseInt(localStorage.getItem('pageSize')) || 10;
 
     getAccountFromBackend(savedPage, savedSize);
     initSearch();
+    initSortButtons();
 });
 
-const searchAccount = (searchText) => {
-    const size = parseInt(localStorage.getItem("pageSize") || 0);
+const initSortButtons = () => {
+    const buttons = document.querySelectorAll('span.sort-icon');
+    buttons.forEach(button => {
+        sortButtonsEventListener(button)
+    })
+}
 
-    fetch(`/findAccounts?searchTerm=${searchText}?page=0&size=${size}`)
+const sortButtonsEventListener = (button) => {
+    button.addEventListener('click', () => sortByField(button.id))
+}
+
+const searchAccount = (searchText) => {
+    const savedSize = parseInt(localStorage.getItem('pageSize')) || 10;
+    localStorage.setItem('currentPage', 0);
+
+    console.log("Suche nach:", searchText);
+
+    fetch(`/getAccounts?page=0&size=${savedSize}&search=${encodeURIComponent(searchText)}`)
         .then(res => {
             if (!res.ok || res.status === 204) throw new Error("Kein Inhalt oder nicht autorisiert");
             return res.json();
@@ -17,26 +38,70 @@ const searchAccount = (searchText) => {
         .then(data => {
             if (data && data.content) {
                 renderTable(data.content);
+                currentAccounts = data.content;
                 let totalPagesCount = 0;
                 let currentPageIndex = 0;
                 if (data.page) {
                     totalPagesCount = data.page.totalPages;
                     currentPageIndex = data.page.number;
                 }
-                renderPagination(totalPagesCount, currentPageIndex, size);
+                renderPagination(totalPagesCount, currentPageIndex, savedSize);
             }
         })
-        .catch(err => console.error("Fehler beim Abrufen der Daten:", err));
-}
+        .catch(err => {
+            console.error("Fehler bei der Suche:", err);
+            const tbody = document.querySelector('tbody');
+            if (tbody) clearTable(tbody);
+        });
+};
 
+
+//HIGH FUNCTION ORDER
 const initSearch = () => {
     const searchBox = document.getElementById('search-input');
-    if (searchBox){
-        searchBox.addEventListener('keyup', (event) => {
-            searchAccount(event.target.value);
-        })
+    if (searchBox) {
+        const debouncedSearch = debounce((event) => {
+            searchAccount(event.target.value.trim());
+        }, 300);
+
+        searchBox.addEventListener('keyup', debouncedSearch);
     }
-}
+};
+
+const debounce = (callbackFunction, delay = 300) => {
+    let timeoutId;
+
+    return (...args) => {
+        clearTimeout(timeoutId);
+
+        timeoutId = setTimeout(() => {
+            callbackFunction(...args);
+        }, delay);
+    };
+};
+
+const createComparator = (field, direction) => {
+    const sortOrder = direction === 'asc' ? 1 : -1;
+
+    return (a, b) => {
+        const valueA = field === 'pathsort' ? (a.path || '') : (a.email || a.username || '');
+        const valueB = field === 'pathsort' ? (b.path || '') : (b.email || b.username || '');
+
+        return valueA.localeCompare(valueB) * sortOrder;
+    };
+};
+
+const sortByField = (field) => {
+    if (!currentAccounts || currentAccounts.length === 0) return;
+
+    const direction = sortDirections[field] === 'asc' ? 'desc' : 'asc';
+    sortDirections[field] = direction;
+
+    // HOF 2
+    currentAccounts.sort(createComparator(field, direction));
+
+    renderTable(currentAccounts);
+};
 
 const getAccountFromBackend = (page, size) => {
     localStorage.setItem('currentPage', page);
@@ -49,6 +114,7 @@ const getAccountFromBackend = (page, size) => {
         })
         .then(data => {
             if (data && data.content) {
+                currentAccounts = data.content;
                 renderTable(data.content);
                 let totalPagesCount = 0;
                 let currentPageIndex = 0;
@@ -72,16 +138,52 @@ const renderTable = (accounts) => {
 
     accounts.forEach(account => {
         const tr = document.createElement('tr');
+
+        const pwSpanId = `pw-${account.accountUuid}`;
+        const encodedPw = account.passwordEncoded || '';
+
         tr.innerHTML = `
             <td>${account.path || ''}</td>
             <td>${account.email || account.username || ''}</td>
-            <td>${account.passwordEncoded || ''}</td>
+            <td>
+                <span id="${pwSpanId}">********</span>
+                <span class="sort-icon" style="margin-left: 10px; font-size: 1.2em;" onclick="togglePassword('${encodedPw}', '${pwSpanId}')">👁️</span>
+            </td>
             <td><a class="action-link" onclick="editAccount('${account.accountUuid}')">edit</a></td>
             <td><a class="action-link" onclick="deleteAccount('${account.accountUuid}')">delete</a></td>
         `;
         tbody.appendChild(tr);
     });
 }
+
+const togglePassword = async (encryptedPw, spanId) => {
+    const pwElement = document.getElementById(spanId);
+    if (!pwElement || !encryptedPw) return;
+
+    if (pwElement.innerText === '********') {
+        try {
+            const response = await fetch(`/decryptPw?pw=${encodeURIComponent(encryptedPw)}`);
+
+            if (response.status === 401) {
+                alert("Session expired or unauthorized. Please log in again.");
+                return;
+            }
+
+            if (!response.ok) {
+                console.error("Failed to decrypt password");
+                return;
+            }
+
+            const decryptedPw = await response.text();
+            pwElement.innerText = decryptedPw;
+
+        } catch (error) {
+            console.error("Network error while decrypting password:", error);
+        }
+    } else {
+        pwElement.innerText = '********';
+    }
+};
 
 const renderPagination = (totalPages, currentPage, size) => {
     const paginationDiv = document.querySelector('.pagination');
