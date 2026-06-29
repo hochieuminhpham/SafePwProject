@@ -66,7 +66,7 @@ public class AccountController {
         );
 
         if (isUpdated) {
-            log.info("Account {} created", request.getUsername());
+            log.info("Account {} edited", request.getUsername());
             return ResponseEntity.ok().build();
         } else {
             log.info("unable to edit account {}", id);

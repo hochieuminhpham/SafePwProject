@@ -4,11 +4,15 @@ package com.miph._3.SafePasswordProjectMiph.service;
 import com.miph._3.SafePasswordProjectMiph.model.Account;
 import com.miph._3.SafePasswordProjectMiph.model.repository.AccountRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class HomeService {
@@ -28,9 +32,23 @@ public class HomeService {
             return accountRepository.findByUserUuid(uuid, pageRequest);
         }
 
-        String searchKeyword = "%" + search.trim() + "%";
+        List<Account> allAccounts = accountRepository.findByUserUuid(uuid);
+        String keyword = search.trim().toLowerCase();
 
-        return accountRepository.searchByUserUuidAndKeyword(uuid, searchKeyword, pageRequest);
+
+        Predicate<Account> searchLogic = account ->
+                (account.getPath() != null && account.getPath().toLowerCase().contains(keyword)) ||
+                        (account.getUsername() != null && account.getUsername().toLowerCase().contains(keyword)) ||
+                        (account.getEmail() != null && account.getEmail().toLowerCase().contains(keyword));
+
+        List<Account> filteredList = applySearchFilter(allAccounts, searchLogic);
+
+
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), filteredList.size());
+        List<Account> pageContent = (start <= end) ? filteredList.subList(start, end) : List.of();
+
+        return new PageImpl<>(pageContent, pageRequest, filteredList.size());
     }
 
 
@@ -44,5 +62,10 @@ public class HomeService {
         return accountRepository.findAccountsLikeUsername(searchText, uuid, pageRequest);
     }
 
+    protected List<Account> applySearchFilter(List<Account> accounts, Predicate<Account> condition) {
+        return accounts.stream()
+                .filter(condition)
+                .collect(Collectors.toList());
+    }
 
 }

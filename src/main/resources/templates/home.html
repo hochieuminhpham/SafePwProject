@@ -53,7 +53,7 @@
 
         .controls-area {
             display: flex;
-            justify-content: space-between;
+            gap: 10px;
             align-items: center;
             margin-bottom: 10px;
         }
@@ -160,6 +160,10 @@
             <input id='search-input' type="text" />
             <strong>search</strong>
         </div>
+        <p>last updated for</p>
+        <input type="date" id="date-for" placeholder="last updated for">
+        <p>last updated until</p>
+        <input type="date" id="date-until" placeholder="last updated until">
     </div>
 
     <table>
@@ -170,6 +174,7 @@
             <th>Password</th>
             <th></th>
             <th></th>
+            <th>Last Updated</th>
         </tr>
         </thead>
         <tbody>

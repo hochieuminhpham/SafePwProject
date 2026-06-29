@@ -1,5 +1,5 @@
 let currentAccounts = [];
-let sortDirections = {
+const sortDirections = {
     usernamesort: 'asc',
     pathsort: 'asc'
 };
@@ -12,7 +12,52 @@ document.addEventListener('DOMContentLoaded', () => {
     initSearch();
     initSortButtons();
     initLogout();
+    initFilterInputs();
 });
+
+const initFilterInputs = () => {
+    const dateForInput = document.getElementById('date-for');
+    const dateUntilInput = document.getElementById('date-until');
+    const tbody = document.querySelector("tbody");
+    if (dateForInput && dateUntilInput){
+        dateForInput.addEventListener('change', (e) =>  filter(e, filterByForDate))
+        dateUntilInput.addEventListener('change', (e) => filter(e, filterByUntilDate))
+    }
+}
+const filter = (event, callback) => {
+    const value = event.target.value;
+    if (value){
+        callback(value);
+    }
+}
+
+const filterByForDate = (dateString) => {
+    if (!currentAccounts) return;
+
+    const filterDate = new Date(dateString);
+
+    const filteredAccounts = currentAccounts.filter(account => {
+        const accountDate = new Date(account.updatedAt);
+
+        return accountDate >= filterDate;
+    });
+
+    renderTable(filteredAccounts);
+}
+
+const filterByUntilDate = (dateString) => {
+    if (!currentAccounts) return;
+
+    const filterDate = new Date(dateString);
+
+    const filteredAccounts = currentAccounts.filter(account => {
+        const accountDate = new Date(account.updatedAt);
+
+        return accountDate <= filterDate;
+    });
+
+    renderTable(filteredAccounts);
+}
 
 const initLogout = () => {
     const button = document.getElementById('logout-button');
@@ -46,8 +91,10 @@ const initSortButtons = () => {
 }
 
 const sortButtonsEventListener = (button) => {
-    button.addEventListener('click', () => sortByField(button.id))
+    button.addEventListener('click', () => handleSortClick(button.id))
 }
+
+
 
 const searchAccount = (searchText) => {
     const savedSize = parseInt(localStorage.getItem('pageSize')) || 10;
@@ -116,16 +163,19 @@ const createComparator = (field, direction) => {
     };
 };
 
-const sortByField = (field) => {
+//PURE FUNCTION
+const getSortedAccounts = (accounts, field, direction) => {
+    return [...accounts].sort(createComparator(field, direction));
+};
+
+const handleSortClick = (field) => {
     if (!currentAccounts || currentAccounts.length === 0) return;
 
     const direction = sortDirections[field] === 'asc' ? 'desc' : 'asc';
     sortDirections[field] = direction;
 
-    // HOF 2
-    currentAccounts.sort(createComparator(field, direction));
-
-    renderTable(currentAccounts);
+    const sortedData = getSortedAccounts(currentAccounts, field, direction);
+    renderTable(sortedData);
 };
 
 const getAccountFromBackend = (page, size) => {
@@ -177,6 +227,7 @@ const renderTable = (accounts) => {
             </td>
             <td><a class="action-link" onclick="editAccount('${account.accountUuid}')">edit</a></td>
             <td><a class="action-link" onclick="deleteAccount('${account.accountUuid}')">delete</a></td>
+            <td class="last-update-column">${account.updatedAt}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -211,57 +262,43 @@ const togglePassword = async (encryptedPw, spanId) => {
     }
 };
 
+
+// DEKLARATIV
 const renderPagination = (totalPages, currentPage, size) => {
     const paginationDiv = document.querySelector('.pagination');
-    paginationDiv.innerHTML = '';
 
-    if (!totalPages || totalPages <= 1) return;
-
-    const prevSpan = document.createElement('span');
-    prevSpan.innerHTML = '&laquo;';
-    if (currentPage > 0) {
-        prevSpan.style.color = '#0056b3';
-        prevSpan.style.cursor = 'pointer';
-        prevSpan.onclick = () => getAccountFromBackend(currentPage - 1, size);
-    } else {
-        prevSpan.style.color = '#ccc';
-        prevSpan.style.cursor = 'not-allowed';
-        prevSpan.onclick = null;
-    }
-    paginationDiv.appendChild(prevSpan);
-
-    for (let i = 0; i < totalPages; i++) {
-        const pageSpan = document.createElement('span');
-        pageSpan.textContent = i + 1;
-
-        if (i === currentPage) {
-            pageSpan.style.backgroundColor = '#dcdcdc';
-            pageSpan.style.color = '#000';
-            pageSpan.style.cursor = 'default';
-            pageSpan.onclick = null;
-        } else {
-            pageSpan.style.color = '#0056b3';
-            pageSpan.style.cursor = 'pointer';
-            pageSpan.onclick = () => getAccountFromBackend(i, size);
-        }
-        paginationDiv.appendChild(pageSpan);
+    if (!totalPages || totalPages <= 1) {
+        paginationDiv.innerHTML = '';
+        return;
     }
 
-    const nextSpan = document.createElement('span');
-    nextSpan.innerHTML = '&raquo;';
-    if (currentPage < totalPages - 1) {
-        nextSpan.style.cursor = 'pointer';
-        nextSpan.onclick = () => getAccountFromBackend(currentPage + 1, size);
-    } else {
-        nextSpan.style.color = '#ccc';
-        nextSpan.style.cursor = 'not-allowed';
-        nextSpan.onclick = null;
-    }
-    paginationDiv.appendChild(nextSpan);
+    const isFirstPage = currentPage === 0;
+    const prevButton = `<span 
+        style="color: ${isFirstPage ? '#ccc' : '#0056b3'}; cursor: ${isFirstPage ? 'not-allowed' : 'pointer'};"
+        ${isFirstPage ? '' : `onclick="getAccountFromBackend(${currentPage - 1}, ${size})"`}
+    >&laquo;</span>`;
+
+    const pageButtons = Array.from({ length: totalPages }, (_, index) => {
+        const isCurrentPage = index === currentPage;
+        return `<span 
+            style="background-color: ${isCurrentPage ? '#dcdcdc' : 'transparent'}; 
+                   color: ${isCurrentPage ? '#000' : '#0056b3'}; 
+                   cursor: ${isCurrentPage ? 'default' : 'pointer'};"
+            ${isCurrentPage ? '' : `onclick="getAccountFromBackend(${index}, ${size})"`}
+        >${index + 1}</span>`;
+    }).join('');
+
+    const isLastPage = currentPage >= totalPages - 1;
+    const nextButton = `<span 
+        style="color: ${isLastPage ? '#ccc' : '#0056b3'}; cursor: ${isLastPage ? 'not-allowed' : 'pointer'};"
+        ${isLastPage ? '' : `onclick="getAccountFromBackend(${currentPage + 1}, ${size})"`}
+    >&raquo;</span>`;
+
+    paginationDiv.innerHTML = `${prevButton}${pageButtons}${nextButton}`;
 }
 
 const editAccount = (uuid) => {
-    console.log("Edit clicked for UUID:", uuid);
+    window.location.href = `/account?id=${uuid}`;
 }
 
 const deleteAccount = (uuid) => {
@@ -276,8 +313,14 @@ const deleteAccount = (uuid) => {
 }
 
 const hideRow = (uuid) => {
-    const row = document.getElementById(`row-${uuid}`);
-    if (row){
-        row.style.display = 'none';
+    const rowToRemove = document.getElementById(`row-${uuid}`);
+
+    if (rowToRemove) {
+        rowToRemove.remove();
+    }
+
+    if (currentAccounts) {
+        currentAccounts = currentAccounts.filter(account => account.accountUuid !== uuid);
     }
 }
+
