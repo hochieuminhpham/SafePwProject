@@ -32,6 +32,21 @@ public class LoginController {
     @GetMapping("/register")
     public String register(){return "register";}
 
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie deleteCookie = ResponseCookie.from("user-session", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .secure(true)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build();
+    }
+
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<Void> handleLogin(

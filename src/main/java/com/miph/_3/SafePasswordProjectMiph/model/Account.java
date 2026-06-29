@@ -3,6 +3,7 @@ package com.miph._3.SafePasswordProjectMiph.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,7 +13,7 @@ import java.util.UUID;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     @Column(name = "account_uuid", length = 36, nullable = false, columnDefinition = "VARCHAR(36)")
     private String accountUuid;
 

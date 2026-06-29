@@ -33,6 +33,8 @@ public class HomeService {
         return accountRepository.searchByUserUuidAndKeyword(uuid, searchKeyword, pageRequest);
     }
 
+
+
     public Page<Account> findAccounts(int page, int size, String searchText, String uuid){
         PageRequest pageRequest = PageRequest.of(
                 page,
@@ -42,16 +44,5 @@ public class HomeService {
         return accountRepository.findAccountsLikeUsername(searchText, uuid, pageRequest);
     }
 
-    public Account createAccount(String username, String path, String email, String rawPassword, String userUuid) {
 
-        Account newAccount = new Account();
-        newAccount.setAccountUuid(UUID.randomUUID().toString());
-        newAccount.setUsername(username);
-        newAccount.setPath(path);
-        newAccount.setEmail(email);
-        newAccount.setUserUuid(userUuid);
-        String encodedPassword = encryptionService.encrypt(rawPassword);
-        newAccount.setPasswordEncoded(encodedPassword);
-        return accountRepository.save(newAccount);
-    }
 }

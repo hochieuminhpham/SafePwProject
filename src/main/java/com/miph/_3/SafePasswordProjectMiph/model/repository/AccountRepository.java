@@ -18,6 +18,8 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     Optional<Account> findByUsername(String username);
 
+    Optional<Account> findByAccountUuid(String accountUuid);
+
     @Query("SELECT a FROM Account a WHERE a.username LIKE %:name AND a.userUuid = :userUuid")
     Page<Account> findAccountsLikeUsername(@Param("name") String name, @Param("userUuid") String userUuid, Pageable pageable);
 

@@ -11,7 +11,32 @@ document.addEventListener('DOMContentLoaded', () => {
     getAccountFromBackend(savedPage, savedSize);
     initSearch();
     initSortButtons();
+    initLogout();
 });
+
+const initLogout = () => {
+    const button = document.getElementById('logout-button');
+    if (button){
+        button.addEventListener('click', () => {
+            logout();
+        })
+    }
+}
+
+const logout = async () => {
+    try {
+        const response = await fetch(`/logout`);
+
+        if (!response.ok) {
+            console.error("Failed to logout");
+            return;
+        }
+
+        window.location.href = "/login";
+    } catch (error) {
+        console.error("Network error while trying to logout:", error);
+    }
+}
 
 const initSortButtons = () => {
     const buttons = document.querySelectorAll('span.sort-icon');
@@ -138,6 +163,7 @@ const renderTable = (accounts) => {
 
     accounts.forEach(account => {
         const tr = document.createElement('tr');
+        tr.id = 'row-' + account.accountUuid;
 
         const pwSpanId = `pw-${account.accountUuid}`;
         const encodedPw = account.passwordEncoded || '';
@@ -239,5 +265,19 @@ const editAccount = (uuid) => {
 }
 
 const deleteAccount = (uuid) => {
-    console.log("Delete clicked for UUID:", uuid);
+    fetch(`/deleteAccount?id=${uuid}`)
+        .then(res => {
+            if (res.status !== 200){
+                return;
+            }
+
+            hideRow(uuid)
+        })
+}
+
+const hideRow = (uuid) => {
+    const row = document.getElementById(`row-${uuid}`);
+    if (row){
+        row.style.display = 'none';
+    }
 }
