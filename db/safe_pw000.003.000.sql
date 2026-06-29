@@ -32,6 +32,10 @@ UPDATE account SET password_encoded = 'sdvd5g7GhTENyqU6nObwgg==' WHERE username 
 
 ALTER TABLE account
     MODIFY account_uuid VARCHAR(36) NOT NULL DEFAULT (UUID());
+ALTER TABLE identity
+    MODIFY user_uuid VARCHAR(36) NOT NULL DEFAULT (UUID());
+ALTER TABLE identity
+    CHANGE username username VARCHAR(255) UNIQUE;
 
 insert version (major, minor, patch) values (0, 3, 0);
 commit;

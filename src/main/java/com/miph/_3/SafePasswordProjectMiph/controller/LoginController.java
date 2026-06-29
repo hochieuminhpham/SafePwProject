@@ -32,7 +32,23 @@ public class LoginController {
     @GetMapping("/register")
     public String register(){return "register";}
 
+    @PostMapping("/register")
+    @ResponseBody
+    public ResponseEntity<Void> registerSend( @RequestParam("username") String username,
+                                              @RequestParam("password") String password){
+        log.info("Register attempt for user: {}", username);
+        if (!authService.checkPwComplexityAndLength(password)){
+            log.error("pw is invalid");
+            return ResponseEntity.badRequest().header(HttpHeaders.LOCATION, "/register").build();
+        }
+
+        authService.createIdentity(username, password);
+
+        return ResponseEntity.ok().header(HttpHeaders.LOCATION, "/login").build();
+    }
+
     @GetMapping("/logout")
+    @ResponseBody
     public ResponseEntity<Void> logout() {
         ResponseCookie deleteCookie = ResponseCookie.from("user-session", "")
                 .httpOnly(true)
@@ -46,6 +62,8 @@ public class LoginController {
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .build();
     }
+
+
 
     @PostMapping("/login")
     @ResponseBody

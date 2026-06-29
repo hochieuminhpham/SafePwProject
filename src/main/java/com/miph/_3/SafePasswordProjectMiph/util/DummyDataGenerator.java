@@ -5,6 +5,9 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+
 @Component
 public class DummyDataGenerator {
 
@@ -25,6 +28,15 @@ public class DummyDataGenerator {
                 "umar_u", "valerie_o", "william_n", "xenia_i", "yousef_l",
                 "zoe_p", "aaron_z", "brooke_x", "connor_v", "daisy_w"
         };
+
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+
+        // Konvertierung in Base64 zur einfachen Speicherung
+        String saltString = Base64.getEncoder().encodeToString(salt);
+        System.out.println(saltString);
+
 
         for (String user : usernames) {
             try {

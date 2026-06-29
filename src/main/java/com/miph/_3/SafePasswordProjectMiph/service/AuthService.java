@@ -8,13 +8,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthService {
 
     protected final AccountRepository accountRepository;
     protected final HashingService hashingService;
-    private final IdentityRepository identityRepository;
+    protected final IdentityRepository identityRepository;
+    protected static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{10,}$";
+    protected static final Pattern PATTERN = Pattern.compile(PASSWORD_REGEX);
 
     public AuthService(AccountRepository accountRepository, HashingService hashingService, IdentityRepository identityRepository){
         this.accountRepository = accountRepository;
@@ -36,5 +40,17 @@ public class AuthService {
         }
 
         return identity.getUserUuid();
+    }
+
+    public void createIdentity(String name, String pw){
+        Identity newUser = new Identity();
+        newUser.setUsername(name);
+        newUser.setPasswordHash(hashingService.hashPw(pw));
+        identityRepository.save(newUser);
+    };
+
+    public Boolean checkPwComplexityAndLength(String pw){
+        Matcher matcher = PATTERN.matcher(pw);
+        return matcher.matches();
     }
 }

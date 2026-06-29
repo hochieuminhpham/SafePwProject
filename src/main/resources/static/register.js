@@ -7,10 +7,11 @@ const submitForm = async (form) => {
             body: formData
         });
 
-        if (response.ok) {
-            window.location.href = "/";
+        if (response.status === 200) {
+            window.location.href = "/login";
         } else {
-            alert("Login fehlgeschlagen");
+            alert("Register fehlgeschlagen");
+            window.location.href = "/login.js"
         }
     } catch (error) {
         console.error("Fehler beim Senden:", error);

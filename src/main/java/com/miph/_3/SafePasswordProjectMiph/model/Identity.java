@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 
@@ -14,13 +15,14 @@ import java.time.LocalDateTime;
 public class Identity {
 
     @Id
+    @UuidGenerator
     @Column(name = "user_uuid", length = 36, nullable = false, updatable = false)
     private String userUuid;
 
     @Column(name = "username", length = 50, nullable = false)
     private String username;
 
-    @Column(name = "email", length = 50, nullable = false)
+    @Column(name = "email", length = 50, nullable = true)
     private String email;
 
     @Column(name = "password_hash", length = 255, nullable = false)
